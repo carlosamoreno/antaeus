@@ -7,6 +7,7 @@ import io.pleo.antaeus.core.external.PaymentProvider
 import io.pleo.antaeus.models.InvoiceStatus
 import java.lang.Exception
 import kotlinx.coroutines.*
+import mu.KotlinLogging
 import kotlin.coroutines.CoroutineContext
 
 class BillingService(
@@ -17,6 +18,8 @@ class BillingService(
     private val job = Job()
     override val coroutineContext: CoroutineContext
         get() = job
+
+    private val logger = KotlinLogging.logger {}
 
     fun processPendingInvoices() = launch { processInvoicesByStatus(InvoiceStatus.PENDING) }
     fun processNetworkErrorInvoices() = launch { processInvoicesByStatus(InvoiceStatus.ERROR_NETWORK) }
@@ -40,6 +43,7 @@ class BillingService(
                             else -> InvoiceStatus.ERROR_UNKNOWN
                         }
                     } finally {
+                        logger.trace { "updating invoice.id = $invoice.id to status $invoiceProcessResult"  }
                         invoiceService.updateInvoice(invoice.copy(status = invoiceProcessResult))
                     }
 
