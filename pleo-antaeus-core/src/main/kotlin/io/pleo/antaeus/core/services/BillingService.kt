@@ -19,6 +19,7 @@ class BillingService(
         get() = job
 
     fun processPendingInvoices() = launch { processInvoicesByStatus(InvoiceStatus.PENDING) }
+    fun processNetworkErrorInvoices() = launch { processInvoicesByStatus(InvoiceStatus.ERROR_NETWORK) }
 
     private fun processInvoicesByStatus(status: InvoiceStatus) {
         invoiceService

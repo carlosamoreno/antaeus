@@ -84,9 +84,18 @@ class AntaeusRest(
                     path("billing") {
                         // URL: /rest/v1/billing
                         post() {
-                            it.json(billingService.processPendingInvoices())
+                            billingService.processPendingInvoices()
+                        }
+
+                        path("retry") {
+                            // URL: /rest/v1/billing/retry
+                            post() {
+                                billingService.processNetworkErrorInvoices()
+                            }
                         }
                     }
+
+
                 }
             }
         }
