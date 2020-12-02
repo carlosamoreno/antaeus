@@ -10,11 +10,9 @@ import io.pleo.antaeus.core.exceptions.EntityNotFoundException
 import io.pleo.antaeus.core.services.BillingService
 import io.pleo.antaeus.core.services.CustomerService
 import io.pleo.antaeus.core.services.InvoiceService
-import io.pleo.antaeus.models.InvoiceStatus
 import mu.KotlinLogging
 
 private val logger = KotlinLogging.logger {}
-private val thisFile: () -> Unit = {}
 
 class AntaeusRest(
     private val invoiceService: InvoiceService,
@@ -83,13 +81,13 @@ class AntaeusRest(
 
                     path("billing") {
                         // URL: /rest/v1/billing
-                        post() {
+                        post {
                             billingService.processPendingInvoices()
                         }
 
                         path("retry") {
                             // URL: /rest/v1/billing/retry
-                            post() {
+                            post {
                                 billingService.processNetworkErrorInvoices()
                             }
                         }
