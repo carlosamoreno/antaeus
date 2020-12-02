@@ -25,6 +25,7 @@ class BillingService(
     fun processNetworkErrorInvoices() = launch { processInvoicesByStatus(InvoiceStatus.ERROR_NETWORK) }
 
     private fun processInvoicesByStatus(status: InvoiceStatus) {
+        logger.info { "running billing services for status $status" }
         invoiceService
                 .fetchByStatus(status)
                 .forEach { invoice ->
