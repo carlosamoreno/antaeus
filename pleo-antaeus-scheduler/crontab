@@ -1,0 +1,3 @@
+* * * * * root /scripts/processInvoicesWithNetworkError.sh
+0 0 1 * * root /processInvoice.sh
+# An empty line is required at the end of this file for a valid cron file.

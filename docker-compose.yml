@@ -9,5 +9,10 @@ services:
       - pleo-antaeus-build-cache:/root/.gradle
     tty: true
     stdin_open: true # interactive
+  scheduler:
+    build:
+      dockerfile: $PWD/pleo-antaeus-scheduler/Dockerfile
+      context: $PWD/pleo-antaeus-scheduler
+    image: pleo-antaeus-scheduler:pleo-anteus
 volumes:
   pleo-antaeus-build-cache:
