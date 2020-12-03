@@ -1,18 +1,32 @@
 version: "3.8"
 services:
+  db:
+    image: postgres
+    ports:
+    - "5432:5432"
+    environment:
+      POSTGRES_USER: antaeus
+      POSTGRES_PASSWORD: secret
+      POSTGRES_DB: antaeus
+
+
   pleo-antaeus:
     build: .
-    image: pleo-anteus:pleo-anteus
+    image: pleo-antaeus:pleo-antaeus
     ports:
       - "7000:7000"
     volumes:
       - pleo-antaeus-build-cache:/root/.gradle
     tty: true
     stdin_open: true # interactive
+    depends_on:
+      - db
+
   scheduler:
     build:
       dockerfile: $PWD/pleo-antaeus-scheduler/Dockerfile
       context: $PWD/pleo-antaeus-scheduler
     image: pleo-antaeus-scheduler:pleo-anteus
+
 volumes:
   pleo-antaeus-build-cache:
