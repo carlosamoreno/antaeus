@@ -30,17 +30,17 @@ fun main() {
     // The tables to create in the database.
     val tables = arrayOf(InvoiceTable, CustomerTable)
 
-    val dbFile: File = File.createTempFile("antaeus-db", ".sqlite")
     // Connect to the database and create the needed tables. Drop any existing data.
     val db = Database
-        .connect(url = "jdbc:sqlite:${dbFile.absolutePath}",
-            driver = "org.sqlite.JDBC",
-            user = "root",
-            password = "")
+        .connect(url = "jdbc:postgresql://db:5432/antaeus",
+            driver = "org.postgresql.Driver",
+            user = "antaeus",
+            password = "secret")
         .also {
             TransactionManager.manager.defaultIsolationLevel = Connection.TRANSACTION_SERIALIZABLE
             transaction(it) {
                 addLogger(StdOutSqlLogger)
+
                 // Drop all existing tables to ensure a clean slate on each run
                 SchemaUtils.drop(*tables)
                 // Create all tables

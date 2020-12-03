@@ -1,6 +1,6 @@
 /*
     Defines database tables and their schemas.
-    To be used by `AntaeusDal`.
+    To be used by `CustomerDal and InvoiceDal`.
  */
 
 package io.pleo.antaeus.data
