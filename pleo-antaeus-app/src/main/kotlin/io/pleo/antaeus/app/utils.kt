@@ -1,5 +1,8 @@
 
+import com.rabbitmq.client.Channel
+import com.rabbitmq.client.ConnectionFactory
 import io.pleo.antaeus.core.external.PaymentProvider
+import io.pleo.antaeus.core.external.QueueProvider
 import io.pleo.antaeus.data.InvoiceDal
 import io.pleo.antaeus.data.CustomerDal
 import io.pleo.antaeus.models.Currency
@@ -7,6 +10,8 @@ import io.pleo.antaeus.models.Invoice
 import io.pleo.antaeus.models.InvoiceStatus
 import io.pleo.antaeus.models.Money
 import java.math.BigDecimal
+import java.nio.charset.StandardCharsets
+import java.util.*
 import kotlin.random.Random
 
 // This will create all schemas and setup initial data
@@ -29,6 +34,16 @@ internal fun setupInitialData(customerDal: CustomerDal, invoiceDal: InvoiceDal) 
             )
         }
     }
+}
+
+// This will create the connection with the queue
+internal fun setupQueue(): QueueProvider {
+    val connectionFactory = ConnectionFactory()
+    connectionFactory.host = "queue"
+    val channel = connectionFactory.newConnection().createChannel()
+    channel.queueDeclare("antaeus", false, false, false, null)
+
+    return QueueProvider(channel)
 }
 
 // This is the mocked instance of the payment provider

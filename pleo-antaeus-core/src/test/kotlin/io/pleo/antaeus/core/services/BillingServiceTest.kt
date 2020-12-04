@@ -19,7 +19,7 @@ import java.math.BigDecimal
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class BillingServiceTest {
 
-    private val actualInvoice: Invoice = Invoice(1, 1, Money(BigDecimal(100.0), Currency.EUR), InvoiceStatus.PENDING)
+    /*private val actualInvoice: Invoice = Invoice(1, 1, Money(BigDecimal(100.0), Currency.EUR), InvoiceStatus.PENDING)
     private lateinit var invoiceService: InvoiceService
     private lateinit var billingService: BillingService
 
@@ -139,5 +139,5 @@ class BillingServiceTest {
     private fun mockPaymentProviderWithResultUnexpectedError(invoice: Invoice) = mockk<PaymentProvider> {
         every { charge(invoice) } throws Exception()
     }
-
+*/
 }

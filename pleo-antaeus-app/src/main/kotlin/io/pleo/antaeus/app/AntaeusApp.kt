@@ -11,9 +11,9 @@ import getPaymentProvider
 import io.pleo.antaeus.core.services.BillingService
 import io.pleo.antaeus.core.services.CustomerService
 import io.pleo.antaeus.core.services.InvoiceService
-import io.pleo.antaeus.data.InvoiceDal
 import io.pleo.antaeus.data.CustomerDal
 import io.pleo.antaeus.data.CustomerTable
+import io.pleo.antaeus.data.InvoiceDal
 import io.pleo.antaeus.data.InvoiceTable
 import io.pleo.antaeus.rest.AntaeusRest
 import org.jetbrains.exposed.sql.Database
@@ -23,7 +23,7 @@ import org.jetbrains.exposed.sql.addLogger
 import org.jetbrains.exposed.sql.transactions.TransactionManager
 import org.jetbrains.exposed.sql.transactions.transaction
 import setupInitialData
-import java.io.File
+import setupQueue
 import java.sql.Connection
 
 fun main() {
@@ -58,12 +58,18 @@ fun main() {
     // Get third parties
     val paymentProvider = getPaymentProvider()
 
+    // Set up queue
+    val queueProvider = setupQueue()
+
     // Create core services
     val invoiceService = InvoiceService(dal = invoiceDal)
     val customerService = CustomerService(dal = customerDal)
 
     // This is _your_ billing service to be included where you see fit
-    val billingService = BillingService(paymentProvider = paymentProvider, invoiceService = invoiceService)
+    val billingService = BillingService(
+            paymentProvider = paymentProvider,
+            invoiceService = invoiceService,
+            queueProvider = queueProvider)
 
     // Create REST web service
     AntaeusRest(

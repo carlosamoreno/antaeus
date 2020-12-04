@@ -4,6 +4,7 @@ import io.pleo.antaeus.core.exceptions.CurrencyMismatchException
 import io.pleo.antaeus.core.exceptions.CustomerNotFoundException
 import io.pleo.antaeus.core.exceptions.NetworkException
 import io.pleo.antaeus.core.external.PaymentProvider
+import io.pleo.antaeus.core.external.QueueProvider
 import io.pleo.antaeus.models.InvoiceStatus
 import java.lang.Exception
 import kotlinx.coroutines.*
@@ -12,7 +13,8 @@ import kotlin.coroutines.CoroutineContext
 
 class BillingService(
         private val paymentProvider: PaymentProvider,
-        private val invoiceService: InvoiceService
+        private val invoiceService: InvoiceService,
+        private val queueProvider: QueueProvider
 ): CoroutineScope {
 
     private val job = Job()
@@ -24,6 +26,15 @@ class BillingService(
     fun processPendingInvoices() = launch { processInvoicesByStatus(InvoiceStatus.PENDING) }
     fun processNetworkErrorInvoices() = launch { processInvoicesByStatus(InvoiceStatus.ERROR_NETWORK) }
 
+    private fun processInvoicesByStatus(status: InvoiceStatus) {
+        logger.info { "queueing billing services for status $status" }
+        invoiceService
+                .fetchByStatus(status)
+                .forEach { invoice ->
+                    queueProvider.queueInvoice(invoice)
+                }
+    }
+/*
     private fun processInvoicesByStatus(status: InvoiceStatus) {
         logger.info { "running billing services for status $status" }
         invoiceService
@@ -51,5 +62,6 @@ class BillingService(
                 }
 
     }
+*/
 
 }

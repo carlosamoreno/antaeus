@@ -3,18 +3,17 @@ services:
   db:
     image: postgres
     ports:
-    - "5432:5432"
+    - 5432:5432
     environment:
       POSTGRES_USER: antaeus
       POSTGRES_PASSWORD: secret
       POSTGRES_DB: antaeus
 
-
   pleo-antaeus:
     build: .
     image: pleo-antaeus:pleo-antaeus
     ports:
-      - "7000:7000"
+      - 7000:7000
     volumes:
       - pleo-antaeus-build-cache:/root/.gradle
     tty: true
@@ -28,5 +27,10 @@ services:
       context: $PWD/pleo-antaeus-scheduler
     image: pleo-antaeus-scheduler:pleo-anteus
 
+  queue:
+    image: library/rabbitmq:3-management
+    ports:
+    - 5672:5672
+    - 15672:15672
 volumes:
   pleo-antaeus-build-cache:
