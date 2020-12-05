@@ -1,36 +1,34 @@
 package io.pleo.antaeus.core.external.billing
 
-import io.pleo.antaeus.core.exceptions.CurrencyMismatchException
-import io.pleo.antaeus.core.exceptions.CustomerNotFoundException
-import io.pleo.antaeus.core.exceptions.NetworkException
+import com.google.gson.Gson
+import com.rabbitmq.client.AMQP
+import com.rabbitmq.client.Channel
+import com.rabbitmq.client.DefaultConsumer
+import com.rabbitmq.client.Envelope
 import io.pleo.antaeus.core.external.PaymentProvider
 import io.pleo.antaeus.core.services.InvoiceService
 import io.pleo.antaeus.models.Invoice
-import io.pleo.antaeus.models.InvoiceStatus
 import mu.KotlinLogging
 
-private val logger = KotlinLogging.logger {}
+class BillingInvoiceConsumer (private val channel: Channel,
+                              private val paymentProvider: PaymentProvider,
+                              private val invoiceService: InvoiceService) {
 
-fun processInvoice(paymentProvider: PaymentProvider,
-                   invoiceService: InvoiceService,
-                   invoice: Invoice) {
+    private val logger = KotlinLogging.logger {}
 
-    var invoiceProcessResult = invoice.status
-    try {
-        invoiceProcessResult = if (paymentProvider.charge(invoice))
-            InvoiceStatus.PAID
-        else
-            InvoiceStatus.ERROR_NO_BALANCE
-
-    } catch (err: Exception) {
-        invoiceProcessResult = when (err) {
-            is CustomerNotFoundException -> InvoiceStatus.ERROR_CUSTOMER_NOT_FOUND
-            is CurrencyMismatchException -> InvoiceStatus.ERROR_CURRENCY_MISMATCH
-            is NetworkException -> InvoiceStatus.ERROR_NETWORK
-            else -> InvoiceStatus.ERROR_UNKNOWN
+    private val consumer = object : DefaultConsumer(channel) {
+        override fun handleDelivery(consumerTag: String, envelope: Envelope, properties: AMQP.BasicProperties, body: ByteArray) {
+            val message = String(body, charset("UTF-8"))
+            val invoice = Gson().fromJson(message, Invoice::class.java)
+            logger.info(" [x] Received '$message'")
+            try {
+                processInvoice(paymentProvider, invoiceService, invoice)
+            } finally {
+                channel.basicAck(envelope.deliveryTag, false)
+            }
         }
-    } finally {
-        logger.info { "updating invoice.id = $invoice.id to status $invoiceProcessResult" }
-        invoiceService.updateInvoice(invoice.copy(status = invoiceProcessResult))
     }
+
+    fun registerConsumer(): String = channel.basicConsume("antaeus", false, consumer)
+
 }

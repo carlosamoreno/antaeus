@@ -7,9 +7,8 @@
 
 package io.pleo.antaeus.app
 
-import getPaymentProvider
 import io.pleo.antaeus.core.external.billing.BillingInvoiceProducer
-import io.pleo.antaeus.core.external.billing.BillingInvoiceWorker
+import io.pleo.antaeus.core.external.billing.BillingInvoiceConsumer
 import io.pleo.antaeus.core.services.BillingService
 import io.pleo.antaeus.core.services.CustomerService
 import io.pleo.antaeus.core.services.InvoiceService
@@ -24,8 +23,6 @@ import org.jetbrains.exposed.sql.StdOutSqlLogger
 import org.jetbrains.exposed.sql.addLogger
 import org.jetbrains.exposed.sql.transactions.TransactionManager
 import org.jetbrains.exposed.sql.transactions.transaction
-import setupInitialData
-import setupQueue
 import java.sql.Connection
 
 fun main() {
@@ -67,7 +64,7 @@ fun main() {
     // Set up queue and start consumer
     val queueChannel = setupQueue()
     val billingServiceProducer = BillingInvoiceProducer(queueChannel)
-    BillingInvoiceWorker(queueChannel, paymentProvider,invoiceService).start()
+    BillingInvoiceConsumer(queueChannel, paymentProvider,invoiceService).registerConsumer()
 
 
     // This is _your_ billing service to be included where you see fit

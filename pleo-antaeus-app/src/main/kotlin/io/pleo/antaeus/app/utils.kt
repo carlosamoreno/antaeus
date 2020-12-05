@@ -1,6 +1,10 @@
+package io.pleo.antaeus.app
 
 import com.rabbitmq.client.Channel
 import com.rabbitmq.client.ConnectionFactory
+import io.pleo.antaeus.core.exceptions.CurrencyMismatchException
+import io.pleo.antaeus.core.exceptions.CustomerNotFoundException
+import io.pleo.antaeus.core.exceptions.NetworkException
 import io.pleo.antaeus.core.external.PaymentProvider
 import io.pleo.antaeus.data.InvoiceDal
 import io.pleo.antaeus.data.CustomerDal
@@ -48,7 +52,14 @@ internal fun setupQueue(): Channel {
 internal fun getPaymentProvider(): PaymentProvider {
     return object : PaymentProvider {
         override fun charge(invoice: Invoice): Boolean {
-                return Random.nextBoolean()
+            return when (Random.nextInt(5)) {
+                0 -> true
+                1 -> false
+                2 -> throw CustomerNotFoundException(invoice.id)
+                3 -> throw CurrencyMismatchException(invoice.id, invoice.customerId)
+                4 -> throw NetworkException()
+                else -> throw Exception()
+            }
         }
     }
 }
