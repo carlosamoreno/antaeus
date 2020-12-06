@@ -14,6 +14,9 @@ Fork this repo with your solution. Ideally, we'd like to see your progression th
 
 Please let us know how long the challenge takes you. We're not looking for how speedy or lengthy you are. It's just really to give us a clearer idea of what you've produced in the time you decided to take. Feel free to go as big or as small as you want.
 
+## Proposed solution
+I created and independent file with my solution, to separate from the original README. It can be found in [SOLUTION.md](./SOLUTION.md)
+
 ## Developing
 
 Requirements:
