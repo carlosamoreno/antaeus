@@ -7,13 +7,14 @@
 
 package io.pleo.antaeus.app
 
-import getPaymentProvider
+import io.pleo.antaeus.core.external.billing.BillingInvoiceProducer
+import io.pleo.antaeus.core.external.billing.BillingInvoiceConsumer
 import io.pleo.antaeus.core.services.BillingService
 import io.pleo.antaeus.core.services.CustomerService
 import io.pleo.antaeus.core.services.InvoiceService
-import io.pleo.antaeus.data.InvoiceDal
 import io.pleo.antaeus.data.CustomerDal
 import io.pleo.antaeus.data.CustomerTable
+import io.pleo.antaeus.data.InvoiceDal
 import io.pleo.antaeus.data.InvoiceTable
 import io.pleo.antaeus.rest.AntaeusRest
 import org.jetbrains.exposed.sql.Database
@@ -22,8 +23,6 @@ import org.jetbrains.exposed.sql.StdOutSqlLogger
 import org.jetbrains.exposed.sql.addLogger
 import org.jetbrains.exposed.sql.transactions.TransactionManager
 import org.jetbrains.exposed.sql.transactions.transaction
-import setupInitialData
-import java.io.File
 import java.sql.Connection
 
 fun main() {
@@ -62,8 +61,16 @@ fun main() {
     val invoiceService = InvoiceService(dal = invoiceDal)
     val customerService = CustomerService(dal = customerDal)
 
+    // Set up queue and start consumer
+    val queueChannel = setupQueue()
+    val billingServiceProducer = BillingInvoiceProducer(queueChannel)
+    BillingInvoiceConsumer(queueChannel, paymentProvider,invoiceService).registerConsumer()
+
+
     // This is _your_ billing service to be included where you see fit
-    val billingService = BillingService(paymentProvider = paymentProvider, invoiceService = invoiceService)
+    val billingService = BillingService(
+            invoiceService = invoiceService,
+            billingInvoiceProducer = billingServiceProducer)
 
     // Create REST web service
     AntaeusRest(
